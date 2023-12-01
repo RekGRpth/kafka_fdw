@@ -32,8 +32,7 @@ static ForeignScan *   kafkaGetForeignPlan(PlannerInfo *root,
                                            Oid          foreigntableid,
                                            ForeignPath *best_path,
                                            List *       tlist,
-                                           List *       scan_clauses,
-                                           Plan *       outer_plan);
+                                           List *       scan_clauses);
 static void            kafkaExplainForeignScan(ForeignScanState *node, ExplainState *es);
 static void            kafkaBeginForeignScan(ForeignScanState *node, int eflags);
 static TupleTableSlot *kafkaIterateForeignScan(ForeignScanState *node);
@@ -265,8 +264,7 @@ kafkaGetForeignPlan(PlannerInfo *root,
                     Oid          foreigntableid,
                     ForeignPath *best_path,
                     List *       tlist,
-                    List *       scan_clauses,
-                    Plan *       outer_plan)
+                    List *       scan_clauses)
 {
     ListCell *         lc;
     List *             scan_list, *scan_node_list, *param_list;
@@ -332,10 +330,7 @@ kafkaGetForeignPlan(PlannerInfo *root,
                             scan_clauses,
                             scan_relid,
                             param_list,
-                            options,
-                            NIL, /* no custom tlist */
-                            NIL, /* no remote quals */
-                            outer_plan);
+                            options);
 }
 
 /* helper function to return a stringified version of scan params */
@@ -829,7 +824,7 @@ kafkaIterateForeignScan(ForeignScanState *node)
         }
     }
 
-    ReadKafkaMessage(node->ss.ss_currentRelation, festate, message, ccxt, &slot->tts_values, &slot->tts_isnull);
+    ReadKafkaMessage(node->ss.ss_currentRelation, festate, message, ccxt, &slot->PRIVATE_tts_values, &slot->PRIVATE_tts_isnull);
     ExecStoreVirtualTuple(slot);
 
     rd_kafka_message_destroy(message);
@@ -1208,9 +1203,6 @@ kafkaPlanForeignModify(PlannerInfo *root, ModifyTable *plan, Index resultRelatio
      */
     if (plan->returningLists)
         returningList = (List *) list_nth(plan->returningLists, subplan_index);
-
-    if (plan->onConflictAction)
-        elog(ERROR, "unexpected ON CONFLICT specification: %d", (int) plan->onConflictAction);
 
 #if PG_VERSION_NUM < 130000
     heap_close(rel, NoLock);

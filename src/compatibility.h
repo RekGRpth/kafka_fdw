@@ -74,6 +74,6 @@ ExecInitExprList(List *nodes, PlanState *parent)
                                       fdw_outerpath,                                                                   \
                                       fdw_private)                                                                     \
     (create_foreignscan_path(                                                                                          \
-      planner_info, reloptinfo, rows, startup_cost, total_cost, pathkeys, req_outer, fdw_outerpath, fdw_private))
+      planner_info, reloptinfo, rows, startup_cost, total_cost, pathkeys, req_outer, fdw_private))
 #endif
 #endif
